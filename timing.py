@@ -17,6 +17,7 @@ from matplotlib.backends.backend_pdf import PdfPages
 from matplotlib.figure import Figure
 import matplotlib.pyplot as plt
 
+
 #============================================================================================================
 class Stopwindow (QMainWindow):
     def __init__(self):
@@ -54,7 +55,8 @@ class Stopwindow (QMainWindow):
         # print(QtCore.QTimer.timerType(QtCore.QTimer(self)))
         # self.timer.setTimerType(4)
         self.timer.timeout.connect(self.run_watch)
-        self.timer.setInterval(1)
+        self.timer.setInterval(1) # milliseconds
+        # self.timer.setInterval(1000) # seconds
         self.mscounter = 0
         self.isreset = True
         self.showLCD()
@@ -207,7 +209,8 @@ class Stopwindow (QMainWindow):
                 # print(item.row())
             
             itam = self.tableWidget.item(location,1)
-            a_name = '0:00:00.000' if itam is None else itam.text()
+            a_name = '0:00:00.000' if itam is None else itam.text() # milliseconds
+            # a_name = '0:00:00' if itam is None else itam.text() # seconds
             tList = [a_name, self.a]
             # print(tList)
             
@@ -222,14 +225,17 @@ class Stopwindow (QMainWindow):
 
         #============================================================================================================               
     def showLCD(self):
-        text = str(datetime.timedelta(milliseconds=self.mscounter))[:-3]
+        text = str(datetime.timedelta(milliseconds=self.mscounter))[:-3] # Milliseconds
+        # text = str(datetime.timedelta(seconds=self.mscounter)) # seconds
         # print(text)
         self.a=text
-        self.lcdNumber.setDigitCount(11)
+        self.lcdNumber.setDigitCount(11) # milliseconds
+        # self.lcdNumber.setDigitCount(7) # seconds
         if not self.isreset:  # if "isreset" is False
             self.lcdNumber.display(text)
         else:
-            self.lcdNumber.display('0:00:00.000')
+            self.lcdNumber.display('0:00:00.000') # milliseconds
+            # self.lcdNumber.display('0:00:00') # seconds
     
     def run_watch(self):
         self.mscounter += 1
@@ -296,6 +302,8 @@ class Stopwindow (QMainWindow):
         # print(df.dtypes)
         # return df
         
+        df['hours'] = (df['Time on project'].dt.hour + df['Time on project'].dt.minute/60 + df['Time on project'].dt.second/3600).round(decimals=4)
+        
         self.plot(df)   
 
         #============================================================================================================     
@@ -304,7 +312,9 @@ class Stopwindow (QMainWindow):
         ax.clear()
         
         # df.plot.bar(x='Project',y='Time on project', ax=ax)
-        df.plot(x='Project',y='Time on project', ax=ax, marker='*')
+        # df.plot(x='Project',y='Time on project', ax=ax, marker='*')
+        # df.plot(x='Project',y='hours', ax=ax, marker='*') # Line graph
+        df.plot(kind='bar', x='Project',y='hours', ax=ax) # bar chart
         
         for tick in ax.get_xticklabels():
             tick.set_rotation(90)
@@ -313,9 +323,9 @@ class Stopwindow (QMainWindow):
         if leg:
             leg.set_draggable(True)
 
-        ax.set_ylabel('Time')
+        ax.set_ylabel('Time (hours)')
 
-        #Add major and Minor gridlines
+        # Add major and Minor gridlines
         # Customize the major grid
         ax.grid(which='major', linestyle=':', linewidth='0.5', color='grey')
         # Customize the minor grid
@@ -395,6 +405,8 @@ class Stopwindow (QMainWindow):
     #read in previous session links and settings
     def restoreSession(self):
         fname, _ = QFileDialog.getOpenFileName(self, 'Select session to restore', (os.path.join(os.path.join(os.path.expanduser('~')), 'Documents', 'Timer')), 'INI files (*.ini)')
+        if not os.path.exists(fname):
+            return
         self.settings = QSettings(fname, QSettings.IniFormat)
         for name, obj in inspect.getmembers(self):
             if isinstance(obj, QLineEdit):
@@ -442,10 +454,10 @@ class Stopwindow (QMainWindow):
             
         #============================================================================================================        
     def newSession (self):
-        #reset timer
+        # reset timer
         self.watch_reset()
         
-        #clear all fields to allow new data to be loaded - issue with clearing plot still though
+        # clear all fields to allow new data to be loaded - issue with clearing plot still though
         self.lineEdit.clear()
 
         self.tableWidget.clear()
@@ -459,15 +471,15 @@ class Stopwindow (QMainWindow):
 
         #============================================================================================================            
     def Add (self):
-        #get file name and add it to the table view
+        # get file name and add it to the table view
         a = self.lineEdit.text()
 
-        #Create empty row at bottom of table
+        # Create empty row at bottom of table
         numRows = self.tableWidget.rowCount()
 
         self.tableWidget.insertRow(numRows)
 
-        #Add text to row
+        # Add text to row
         self.tableWidget.setItem(numRows, 0, QTableWidgetItem(a))
         
         self.combo()
@@ -476,7 +488,7 @@ class Stopwindow (QMainWindow):
 
         #============================================================================================================            
     def Remove (self):
-        #Remove selected row from table
+        # Remove selected row from table
         self.tableWidget.removeRow(self.tableWidget.currentRow())
 
         #============================================================================================================
@@ -496,15 +508,26 @@ class Stopwindow (QMainWindow):
         df = pd.DataFrame(df_list, columns=headers)
         
         df['Time on project']=pd.to_datetime(df['Time on project'])
-        # df['Time on project'] = df['Time on project'].apply(lambda x: datetime.datetime.strftime(x, "%H:%M:%S.%f")[:-3])
+        # df['Time on project'] = df['Time on project'].apply(lambda x: datxetime.datetime.strftime(x, "%H:%M:%S.%f")[:-3])
+        
+        df['hr'] = df['Time on project'].dt.hour
+        df['mn'] = df['Time on project'].dt.minute
+        df['sec'] = df['Time on project'].dt.second
+
+        df['minutes'] = df['Time on project'].dt.hour * 60 + df['Time on project'].dt.minute + df['Time on project'].dt.second/60
+
+        df['hours'] = (df['Time on project'].dt.hour + df['Time on project'].dt.minute/60 + df['Time on project'].dt.second/3600).round(decimals=4)
+        # df['time_hour'] = df['Time on project'].dt.time
+        
 
         #Save csv file to allow reload/reuse
         filename,_ = QFileDialog.getSaveFileName(self, "Save dataframe", (os.path.join(os.path.join(os.path.expanduser('~')), 'Documents', 'Timer')), "CSV files (*.csv)")
         df.to_csv(filename, index=False)
 
-        #============================================================================================================
+#============================================================================================================
 if __name__=="__main__":
     app = QtWidgets.QApplication(sys.argv)
     MainWindow = Stopwindow()
     MainWindow.show ()
     sys.exit(app.exec_())
+    
