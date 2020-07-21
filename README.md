@@ -26,6 +26,8 @@ Presenting results:
 The 'Timer' tab shows the total time spent on the project in table form with a graphical representation shown on the 'Graphic' tab (subject to improvement).
 Graphic is automatically updated when data is commited to the table - see 'Using the timer'.
 
+Time on project shown in hours.
+
 Additionally the table can be exported using the keyboard shortcut "ctrl+C" and the graph exported as PDF using "ctrl+P" or using the file menu options.  The table data export as csv can also be started using the 'EXPORT' button.
 
 Sessions:
