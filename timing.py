@@ -510,11 +510,11 @@ class Stopwindow (QMainWindow):
         df['Time on project']=pd.to_datetime(df['Time on project'])
         # df['Time on project'] = df['Time on project'].apply(lambda x: datxetime.datetime.strftime(x, "%H:%M:%S.%f")[:-3])
         
-        df['hr'] = df['Time on project'].dt.hour
-        df['mn'] = df['Time on project'].dt.minute
-        df['sec'] = df['Time on project'].dt.second
+        # df['hr'] = df['Time on project'].dt.hour
+        # df['mn'] = df['Time on project'].dt.minute
+        # df['sec'] = df['Time on project'].dt.second
 
-        df['minutes'] = df['Time on project'].dt.hour * 60 + df['Time on project'].dt.minute + df['Time on project'].dt.second/60
+        # df['minutes'] = df['Time on project'].dt.hour * 60 + df['Time on project'].dt.minute + df['Time on project'].dt.second/60
 
         df['hours'] = (df['Time on project'].dt.hour + df['Time on project'].dt.minute/60 + df['Time on project'].dt.second/3600).round(decimals=4)
         # df['time_hour'] = df['Time on project'].dt.time
